@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SimCompanies-Torn
 // @namespace    http://tampermonkey.net/
-// @version      1.9
+// @version      2.0
 // @description  Enhancements for SimCompanies web game. Complies with scripting rules of the game.
 // @author       MOBIL SUPER (bot_7420)
 // @match        https://www.simcompanies.com/*
@@ -11,14 +11,18 @@
 // @grant        GM_xmlhttpRequest
 // @connect      simcotools.app
 // @run-at       document-start
+// @downloadURL https://update.greasyfork.org/scripts/489542/SimCompanies-Torn.user.js
+// @updateURL https://update.greasyfork.org/scripts/489542/SimCompanies-Torn.meta.js
 // ==/UserScript==
 
 (function () {
     "use strict";
 
-    const CustomExchangeInputPrices = [0, 3840, 2880, 60]; // 交易所页面，自定义输入购买数量按钮
-    const CustomProductionTimeInputs = ["8am", "10pm", "6hr", "12hr"]; // 生产页面，自定义输入生产时间按钮
+    const CustomExchangeInputPrices = [9152, 6864, 143, 0]; // 交易所页面，自定义输入购买数量按钮
+    const CustomProductionTimeInputs = ["6hr", "12hr"]; // 生产页面，自定义输入生产时间按钮
     const ContractDiscount = 0.98; // 出售商品页面，合同MP价折扣
+    const StarsOfProduct = 2; // 出售商品页面，查价产品星级
+    const StarsOfResource = 1; // 交易所页面，查价原料星级
 
     let pageSpecifiedTimersList = [];
     let notesElement = null;
@@ -118,7 +122,7 @@
 
                 GM_xmlhttpRequest({
                     method: "GET",
-                    url: `https://simcotools.app/api/v3/resources/${itemId}?realm=${realm}`,
+                    url: `https://simcotools.app/api/v3/resources/${itemId}?realm=${realm}&quality=${StarsOfResource}`,
                     headers: {
                         "Content-Type": "application/json",
                     },
@@ -126,7 +130,8 @@
                         const json = JSON.parse(response.response);
                         const p = document.createElement("p");
                         let text =
-                            "当前: $" +
+                            StarsOfResource +
+                            "星 当前: $" +
                             json.latest_price.toFixed(3) +
                             "<br>日均: $" +
                             json.prices_resume.average.toFixed(3) +
@@ -143,14 +148,14 @@
                 // Add chart
                 GM_xmlhttpRequest({
                     method: "GET",
-                    url: `https://simcotools.app/api/v3/resources/${itemId}/history?realm=${realm}&quality=null&date=&period=3&comparison=1`,
+                    url: `https://simcotools.app/api/v3/resources/${itemId}/history?realm=${realm}&quality=${StarsOfResource}&date=&period=3&comparison=1`,
                     headers: {
                         "Content-Type": "application/json",
                     },
                     onload: function (response3) {
                         GM_xmlhttpRequest({
                             method: "GET",
-                            url: `https://simcotools.app/api/v3/resources/${itemId}/records?realm=${realm}&quality=null&date=&period=1&comparison=previous`,
+                            url: `https://simcotools.app/api/v3/resources/${itemId}/records?realm=${realm}&quality=${StarsOfResource}&date=&period=1&comparison=previous`,
                             headers: {
                                 "Content-Type": "application/json",
                             },
@@ -531,7 +536,7 @@
 
                 GM_xmlhttpRequest({
                     method: "GET",
-                    url: `https://simcotools.app/api/v3/resources/${itemId}?realm=${realm}`,
+                    url: `https://simcotools.app/api/v3/resources/${itemId}?realm=${realm}&quality=${StarsOfProduct}`,
                     headers: {
                         "Content-Type": "application/json",
                     },
@@ -540,7 +545,8 @@
                         amountSpans[0].setAttribute("script-avg-mp", json.prices_resume.average.toFixed(3));
                         const p = document.createElement("p");
                         let text =
-                            "当前: $" +
+                            StarsOfProduct +
+                            "星 当前: $" +
                             json.latest_price.toFixed(3) +
                             "<br>日均: $" +
                             json.prices_resume.average.toFixed(3) +
@@ -557,14 +563,14 @@
                 // Add chart
                 GM_xmlhttpRequest({
                     method: "GET",
-                    url: `https://simcotools.app/api/v3/resources/${itemId}/history?realm=${realm}&quality=null&date=&period=3&comparison=1`,
+                    url: `https://simcotools.app/api/v3/resources/${itemId}/history?realm=${realm}&quality=${StarsOfProduct}&date=&period=3&comparison=1`,
                     headers: {
                         "Content-Type": "application/json",
                     },
                     onload: function (response3) {
                         GM_xmlhttpRequest({
                             method: "GET",
-                            url: `https://simcotools.app/api/v3/resources/${itemId}/records?realm=${realm}&quality=null&date=&period=1&comparison=previous`,
+                            url: `https://simcotools.app/api/v3/resources/${itemId}/records?realm=${realm}&quality=${StarsOfProduct}&date=&period=1&comparison=previous`,
                             headers: {
                                 "Content-Type": "application/json",
                             },
